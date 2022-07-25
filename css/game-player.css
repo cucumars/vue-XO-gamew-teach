@@ -1,0 +1,29 @@
+/* 遊戲玩家人物 CSS */
+.header {
+  width: 100%;
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  margin-bottom: -310px;
+}
+
+.player {
+  border: 0px solid black;
+  border-radius: 5%;
+  padding: 10px;
+  background: conic-gradient(#ff0, #f50, #0c0, #09d, #03a, #909, #f00, #ff0);
+}
+
+.player img {
+  width: 200px;
+  height: 200px;
+  border-radius: 50%;
+}
+
+.player p {
+  margin: 0;
+}
+
+.player span {
+  color: white;
+}

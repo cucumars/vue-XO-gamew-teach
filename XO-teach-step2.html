@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>  
+</head>
+<body>
+  <!-- step 2 畫棋盤 -->
+  <div id="app">
+    <h1 v-text="titleGame"></h1>
+    <!-- 遊戲棋盤 -->
+    <!-- <div>
+      <button >A</button> <button >A</button> <button>A</button>
+    </div>
+    <div>
+      <button >A</button> <button >A</button> <button>A</button>
+    </div>
+    <div>
+      <button >A</button> <button >A</button> <button>A</button>
+    </div>
+    <br/> -->
+    <!-- 利用 v-for 來完成 簡潔明瞭 -->
+    <div v-for="row in 3">
+        <button v-for="column in 3">A</button>
+    </div>
+  </div>
+
+  <script src="https://unpkg.com/vue@3"></script>
+  <script>
+    Vue.createApp({
+      data() {
+        return { 
+          titleGame: '決戰OX棋',  
+        };
+      },
+      mounted() {
+      },
+      methods: {
+      },
+    }).mount('#app');
+  </script>
+</body>
+</html>

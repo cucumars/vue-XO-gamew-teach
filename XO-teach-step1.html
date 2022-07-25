@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>  
+</head>
+<body>
+  <!-- step 1 決戰OX棋 -->
+  <div id="app">
+    <!-- 簡單的資料直接顯示方式 -->
+    {{ titleGame }}      
+    <!-- 利用 v-text 綁定-->
+    <h1 v-text="titleGame"></h1>
+    <!-- v-model 雙向綁定-->
+    <input type="text" v-model="titleGame">
+  </div>
+  <script src="https://unpkg.com/vue@3"></script>
+  <!-- <script src="https://unpkg.com/vue@next"></script> -->
+  <script>
+    Vue.createApp({
+      // 1. data 資料邏輯 => 函式 => 可縮寫 data() {}
+      // data: function (){};
+      data() {
+        return { 
+          titleGame: '決戰OX棋',
+        };
+      },
+      // 2. mounted 生命週期 => 函式 => 可縮寫 data() {}
+      // mounted: function (){}
+      mounted() {
+      },
+      // 3.methods 方法 => 物件
+      methods: {
+      },
+    }).mount('#app');
+  </script>
+</body>
+</html>

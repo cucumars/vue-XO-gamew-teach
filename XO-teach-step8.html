@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+  <style>
+    /* 全域 的 CSS  */
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      font: 24px "Century Gothic", Futura, sans-serif;
+      background-image: url(../image/x2.jpg);
+      margin: 0;
+      padding: 0;
+    }
+
+    input, button {
+      font-size: 100%;
+      line-height: 1.15;
+      cursor: pointer;
+    }
+
+    /* 遊戲棋盤 CSS */
+    .game {
+      /* position: relative; */
+      display: flex;
+      flex-direction: row;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .board {
+      border: 6px solid #000;
+      border-radius: 10px;
+    }
+
+    .board-row {
+      display: flex;
+    }
+
+    .square {
+      width: 200px;
+      height: 200px;
+      border: 10px solid #000;
+      font-size: 200px;
+      font-weight: bold;
+      margin: -4px;
+      display: inline-flex;
+      justify-content: center;
+      align-items: center;
+      background-color: rgba(255, 255, 255, 0.4);
+      cursor: pointer;
+    }
+
+    .status {
+      font-size: 50px;
+      text-align: center;
+      color: yellow;
+      margin-bottom: 20px;
+    }
+
+    /* 遊戲訊息 Css */
+    .game-info {
+        /* position: absolute; */
+        margin-bottom: auto;
+        margin-left: 20px;
+        width: 320px;
+        top: 0;
+        left: 100%;
+    }
+    .game-info ol, .game-info ul {
+      padding-left: 30px;
+      list-style: none;
+      margin-top: -10px;
+      margin-bottom: -10px;
+    }
+
+    .game-info p {
+      font-size: 50px;
+      margin: 12px;
+    }
+  </style>
+</head>
+
+<body>
+  <!-- step 8 加入回溯步數，增加平手判斷，戰況訊息整理為function，計算下棋位置整理為function -->
+  <div id="app">
+    <h1 v-text="titleGame"></h1>
+    <div class="status"> {{status}} </div>
+    <!-- 遊戲主體 -->
+    <div class="game">
+      <!-- 遊戲棋盤 -->
+      <div class="board">
+        <div v-for="row in 3" class="board-row">
+          <button v-for="column in 3"
+            class="square"
+            @click="handleClick(row,column)"> {{ current[getIndex(row,column)] }} </button>
+        </div>
+      </div>
+      <!-- 遊戲訊息 -->
+      <div class="game-info">
+        <p>遊戲資訊</p>
+        <ol>
+          <li v-for="(move, index) in history" :key={move}>
+            <button v-if="index === 0" @Click="jumpTo(0)"> 回到遊戲開始 </button>
+            <button v-else @Click="jumpTo(index)"> {{ `回到 第 ${index} 步` }} </button>
+          </li>
+        </ol>
+      </div>
+    </div>
+  </div>
+  <script src="https://unpkg.com/vue@3"></script>
+  <script>
+    Vue.createApp({
+      data() {
+        return {
+          titleGame: '決戰OX棋',
+          status: '下一個玩家: ', // 顯示 下一個玩家 O or X 或 輸贏的顯示戰況訊息 =>  status: ''; 亦可
+          xIsNext: true, // 決定下一家是否 X
+          current: [], // 目前下棋棋盤   
+          history: [Array(9).fill(null),], // 歷史棋盤紀錄
+          stepNumber: 0, // 玩家下完第幾步
+        };
+      },
+      mounted() {
+        //顯示玩家戰況資訊
+        this.showNextStatus();
+      },
+      methods: {
+        // 每下一棋後的判斷處理主函式
+        handleClick(row,column) {
+          // 拷貝 第 X 步(包含第X步) 之前的棋盤保留 
+          this.history = this.history.slice(0,this.stepNumber + 1);
+          let history = this.history; //避免一直重複使用 this.history,  let history = this.history => 可增加效率 
+          // 拷貝 第 X 盤 當成現在正要下棋之面盤 
+          this.current = [...history[history.length - 1]];
+          let current = this.current; //避免一直重複使用 this.current,  let current = this.current => 可增加效率 
+          let hitWhich = this.getIndex(row,column);  //取得下棋位置
+          // 檢查是否有人贏了或者是否此位置有下子了 => 一定要先檢查是否有人贏了
+          if (this.whoIsWinner(this.current) || this.current[hitWhich]) return;
+          // 若無人贏或此位置無下棋 => 才判斷下的是 O or X, 並記錄
+          this.current[hitWhich] = `${this.xIsNext ? 'X' : 'O'}`; // 判斷顯示 X or O
+          // 存入 history 每盤歷史紀錄陣列
+          history.push(current.slice());
+          this.xIsNext = !this.xIsNext; // 換下一家
+          this.status = this.showNextStatus() ; // 顯示戰況訊息
+          this.stepNumber = history.length - 1; //正下完第幾步
+          // 有人下了 => 檢查是否有人贏了
+          this.winner(this.current);
+        },
+        // 檢查是否有人贏了, 並更新 status 戰況顯示訊息
+        winner(square) {
+          let winner = this.whoIsWinner(square); // 只檢查是否有人贏了 => 有人贏 傳回 O or X; 沒人贏,傳回 null 
+          this.status = winner ? `玩家 ${winner} 贏了`
+            : this.stepNumber === 9 ? `雙方平手`
+              : this.showNextStatus() ;
+        },
+        // 只檢查是否有人贏了 => 有人贏 傳回 O or X; 沒人贏,傳回 null 
+        whoIsWinner(squares) {
+          const lines = [
+            [0,1,2], [3,4,5], [6,7,8], // 橫輛連線
+            [0,3,6], [1,4,7], [2,5,8], // 直行連線
+            [0,4,8], [2,4,6],          // 交叉連線
+          ];
+          for (let i = 0;i < lines.length;i++) {
+            const [a,b,c] = lines[i];
+            if (squares[a] && squares[a] === squares[b] && squares[a] === squares[c]) {
+              return squares[a];
+            }
+          }
+          return null;
+        },
+        // 回到遊戲哪一步
+        jumpTo(step) {
+          this.stepNumber = step;
+          //因為從1開始, 如果回到的步數為偶數 => 則下一家為 X
+          this.xIsNext = (step % 2) === 0;
+          // 回到遊戲棋盤的指定步數
+          this.current = this.history[this.stepNumber];
+          // 檢查輸贏與重設訊息
+          this.winner(this.current);
+        },
+        // 計算下棋位置
+        getIndex(row,column) {
+          return (row - 1) * 3 + column - 1;
+        },
+        // 顯示下一個玩家
+        showNextStatus() {
+          return this.status = `下一個玩家: ${this.xIsNext ? 'X' : 'O'}`;
+        },
+      },
+    }).mount('#app');
+  </script>
+</body>
+
+</html>

@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title> 
+  <style>
+    /* 全域 的 CSS  */
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      font: 24px "Century Gothic", Futura, sans-serif;
+      background-image: url(../image/x2.jpg);
+      margin: 0;
+      padding: 0;
+    }
+
+    /* 遊戲棋盤 CSS */
+    .game {
+      /* position: relative; */
+      display: flex;
+      flex-direction: row;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .board {
+      border: 6px solid #000;
+      border-radius: 10px;
+    }
+
+    .board-row {
+      display: flex;
+    }
+    
+    .square {  
+      width: 200px;  
+      height: 200px;
+      border: 10px solid #000;
+      font-size: 200px;
+      font-weight: bold;
+      margin: -4px;
+      display: inline-flex;
+      justify-content: center;
+      align-items: center;
+      background-color: rgba(255, 255, 255, 0.4);
+      cursor: pointer;
+    }
+
+    .status {
+      font-size: 50px;
+      text-align: center;
+      color: yellow;
+      margin-bottom: 20px;
+    }
+  </style>
+</head>
+<body>
+  <!-- step 5 棋盤再美化，加入玩家輪換控制變數、對戰訊息顯示 -->
+  <div id="app">
+    <h1 v-text="titleGame"></h1> 
+    <div class="status"> {{status}} </div>
+    <!-- 遊戲主體 -->
+    <div class="game">
+      <!-- 遊戲棋盤 -->
+      <div class="board">
+        <div v-for="row in 3" class="board-row">
+          <button v-for="column in 3" 
+            class="square" 
+            @click="handleClick(row,column)"> {{ current[(row - 1) * 3 + column - 1] }}
+          </button>
+        </div>
+      </div>        
+    </div>
+  </div>
+
+  <script src="https://unpkg.com/vue@3"></script>
+  <script>
+    Vue.createApp({
+      data() {
+        return { 
+          titleGame: '決戰OX棋',  
+          status: '下一個玩家: ', // 顯示 下一個玩家 O or X 或 輸贏的顯示戰況訊息 =>  status: ''; 亦可
+          xIsNext: true, // 決定下一家是否 X
+          current:[], // 目前下棋棋盤   
+        };
+      },
+      mounted() {
+        this.status = `下一個玩家: ${this.xIsNext ? 'X' : 'O'}`
+      },
+      methods: {
+        // 每下一棋後的判斷處理主函式
+        handleClick(row,column) {
+          let hitWhich = (row - 1) * 3 + column - 1;  //下 棋位置
+          this.current[hitWhich] = `${this.xIsNext ? 'X' : 'O'}`; // 判斷顯示 X or O
+          this.xIsNext = !this.xIsNext; // 換下一家
+          this.status = `下一個玩家: ${this.xIsNext ? 'X' : 'O'}`; // 顯示戰況訊息
+        }
+      },
+    }).mount('#app');
+  </script>
+</body>
+</html>

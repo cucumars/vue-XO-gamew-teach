@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.1.1/css/all.min.css">
+  <link rel="stylesheet" href="https://unpkg.com/swiper/swiper-bundle.min.css" />
+  <link rel="stylesheet" href="./css/global.css">
+  <link rel="stylesheet" href="./css/homepage.css">
+  <link rel="stylesheet" href="./css/rolepage.css">
+  <link rel="stylesheet" href="./css/game.css">
+  <link rel="stylesheet" href="./css/game-player.css">
+</head>
+
+<body>
+  <div id="app">
+    <section v-show="isHomepageShow">
+      <div id="homepage" class="homepage">
+        <h1 v-text="titleGame"></h1>
+        <button @click="startRoleChoice()" class="btn-big"> 開始遊戲 </button>
+        <p> 網頁設計: {{ gcDesigner }} </p>
+        <p> 程式設計: {{ programmer }} </p>
+        <div class="logos">
+          <img :src="logos[0].image" :alt="logos[0].name" class="logo-left" />
+          <img :src="logos[1].image" :alt="logos[1].name" class="logo-right" />
+        </div>
+        <h2> Vue.js 3 </h2>
+        <h3> 備註: 請按 Ctrl + F5 更新遊戲版本</h3>
+      </div>
+    </section>
+    <section v-show="isRoleChoiceShow">
+      <div class="role-choice">
+        <h1> 人物選擇 </h1>
+        <div class="swiper mySwiper">
+          <div class="swiper-wrapper">
+            <div v-for="(role, index) in roles" :key="role" class="swiper-slide swiper-role">
+              <div>
+                <img :src="role.image">
+                <p>
+                  <span> {{ role.name }} - 
+                    <span v-if="role.gender == 'male'"> 男 </span>
+                    <span v-else>女</span>
+                  </span>
+                </p>
+                <p><span> 戰鬥力: {{ role.power }} </span></p>
+                <div v-if="role.selected" class="swiper-btn role-not-checked role-checked" @click="selectRole(index)">
+                  <i class="fa-solid fa-check"></i>
+                </div>
+                <div v-else class="swiper-btn role-not-checked" required @click="selectRole(index)"></div>
+                <div v-if="role.selected" class="swiper-btn" required @click="setRoleDataIndex(index)"> 變更資訊 </div>
+              </div>            
+            </div>          
+          </div>
+          <div class="swiper-button-prev"></div>
+          <div class="swiper-button-next"></div>
+          <button @click="startGame()" class="role-choice-finish"> 選擇完畢 </button>
+        </div> 
+        <div v-show="isSwiperModalShow" class="role-data-modal">
+          <div>
+            <p>暱稱: <input type="text" v-model="roles[modalIndex].name" minLength="1"
+                maxLength="8" class="swiper-modal-name"> 至多 8 字 </p>
+            <p>
+              <span>性別: </span>
+              <span>
+                <label>
+                  <input type="radio" v-model="roles[modalIndex].gender" value="male"
+                    :checked="roles[modalIndex].gender === 'male'"> &nbsp;男&nbsp;&nbsp;&nbsp; </label>
+                <label>
+                  <input type="radio" v-model="roles[modalIndex].gender" value="female"
+                    :checked="roles[modalIndex].gender === 'female'"> &nbsp;女&nbsp;&nbsp;&nbsp; </label>
+              </span>
+            </p>
+          </div>
+          <p><button @click="setModalHide(roles[modalIndex].name)"> 離開 </button></p>
+        </div>
+
+      </div>
+    </section>
+    <section v-show="isPlayGameShow">
+      <div id="gamepage" class="play-game">
+        <header class="header">
+          <div v-for="role in gameRole" class="player" :key="role">
+            <img :src="role.image" :alt="role.name">
+            <p>
+              <span v-if="role.gender === 'male'">男</span>
+              <span v-else>女</span>
+              <span> - 代號: X</span>
+            </p>
+            <p><span> {{ role.name }} </span></p>
+            <p><span> 戰鬥力 - {{ role.power }} </span></p>
+          </div>
+        </header>
+        <div class="titleGame" v-text="titleGame"></div>
+        <div class="status" v-text="status"></div>
+        <div class="game">
+          <div class="board">
+            <div v-for="row in 3" class="board-row">
+              <button v-for="column in 3"
+                class="square"
+                :class="{ 'color-check-O': isCheckO(row,column) ,  'is-cant-go': isCantGo(row,column) }"
+                @click="handleClick(row,column)"> {{ current[getIndex(row,column)] }} </button>
+            </div>
+          </div>
+          <div class="game-info">
+            <p>遊戲資訊</p>
+            <ol>
+              <li v-for="(move, index) in history" :key={move}>
+                <button v-if="index === 0" @Click="jumpTo(0)"> 回到遊戲開始 </button>
+                <button v-else @Click="jumpTo(index)"> {{ `回到 第 ${index} 步` }} </button>
+              </li>
+            </ol>
+          </div>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script src="https://unpkg.com/vue@3"></script>
+  <script src="https://cdn.jsdelivr.net/npm/swiper/swiper-bundle.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <script>
+    Vue.createApp({
+      data() {
+        return {
+          isHomepageShow: true,
+          isRoleChoiceShow: false,
+          isPlayGameShow: false,
+          programmer: '一鹿狂飆',
+          gcDesigner: '鹿情心　',
+          logos: [
+            {
+              name: '一鹿狂飆',
+              image: './image/deerlogo2.png',
+            },
+            {
+              name: '鹿情心',
+              image: './image/man-1.jpg',
+            },
+          ],
+          swiper: null,
+          roles: [
+            {
+              name: '一鹿狂飆',
+              image: './image/man-1.jpg',
+              power: 1000000,
+              gender: 'male',
+              selected: true,
+            },
+            {
+              name: '水澈靈眸',
+              image: './image/water-3.jpg',
+              power: 5000000,
+              gender: 'female',
+              selected: true,
+            },
+            {
+              name: '惡魔之王',
+              image: './image/devilkingdeer.jpg',
+              power: 10000000,
+              gender: 'male',
+              selected: false,
+            },
+            {
+              name: '不是山水',
+              image: './image/notmoutainwater.jpg',
+              power: 10000000,
+              gender: 'male',
+              selected: false,
+            },
+            {
+              name: '貓咪之王',
+              image: 'https://i.redd.it/7cu5lub5okl21.jpg',
+              power: 20000000,
+              gender: 'male',
+              selected: false,
+            },
+            {
+              name: '毛小孩之王',
+              image: 'http://gardeningclues.com/wp-content/uploads/2019/04/Best-Dog-Breed-For-Seniors-Maltese-Terrier.jpg',
+              power: 20000000,
+              gender: 'male',
+              selected: false,
+            },
+          ],
+          rolesChecked: [0,1],
+          isSwiperModalShow: false,
+          modalIndex: 0,
+          titleGame: '決戰OX棋',
+          status: '下一個玩家: ', 
+          xIsNext: true,
+          current: [],
+          history: [Array(9).fill(null),],
+          stepNumber: 0,
+          gameRole: [],
+        };
+      },
+      mounted() {
+        this.gameRole[0] = this.roles[0];
+        this.gameRole[1] = this.roles[1];
+        this.roleSwiper();
+        this.showNextStatus();
+      },
+      methods: {
+        startRoleChoice() {
+          this.isHomepageShow = false;
+          this.isRoleChoiceShow = true;
+          this.isPlayGameShow = false;
+        },
+        roleSwiper() {
+          this.swiper = new Swiper(".mySwiper", {
+            slidesPerView: 4,
+            spaceBetween: 50,
+            navigation: {
+              nextEl: '.swiper-button-next',
+              prevEl: '.swiper-button-prev',
+            },
+          });
+        },
+        selectRole(index) {
+          let role = this.roles[index];
+          role.selected = !role.selected;
+          if (role.selected) {
+            this.rolesChecked.push(index);
+            if (this.rolesChecked.length > 2) {
+              this.roles[this.rolesChecked[0]].selected = false;
+              this.rolesChecked.splice(0,1);
+            }
+          } else {
+            let loc = this.rolesChecked.indexOf(index);
+            if (loc !== -1) this.rolesChecked.splice(loc,1);
+          }
+        },
+        setRoleDataIndex(index) {
+          this.modalIndex = index;
+          this.isSwiperModalShow = true;
+        },
+        setModalHide(name) {
+          name = name.trim();
+          if (name) 
+            this.isSwiperModalShow = false;
+          else {
+            Swal.fire(
+              '玩家人物暱稱設定未完成',
+              '請填入玩家人物暱稱角色！',
+              'error'
+            );
+          }
+          return name;
+        },
+        startGame() {
+          if (this.rolesChecked.length >= 2) {
+            this.isHomepageShow = false;
+            this.isRoleChoiceShow = false;
+            this.isPlayGameShow = true;
+            this.gameRole[0] = this.roles[this.rolesChecked[0]];
+            this.gameRole[1] = this.roles[this.rolesChecked[1]];
+          } else {
+            Swal.fire(
+              '玩家人物設定未完成',
+              '請選擇兩位玩家人物角色！',
+              'error'
+            );
+          }
+        },
+        handleClick(row,column) {
+          this.history = this.history.slice(0,this.stepNumber + 1);
+          let history = this.history;
+          this.current = [...history[history.length - 1]];
+          let current = this.current;
+          let hitWhich = this.getIndex(row,column);
+          if (this.isCantGo(row,column)) return;
+          this.current[hitWhich] = `${this.xIsNext ? 'X' : 'O'}`;
+          history.push(current.slice());
+          this.xIsNext = !this.xIsNext;
+          this.status = this.showNextStatus();
+          this.stepNumber = history.length - 1;
+          this.winner(this.current);
+        },
+        winner(square) {
+          let winner = this.whoIsWinner(square);
+          this.status = winner ? `玩家 ${winner} 贏了`
+            : this.stepNumber === 9 ? `雙方平手`
+              : this.showNextStatus();
+        },
+        whoIsWinner(squares) {
+          const lines = [
+            [0,1,2],[3,4,5],[6,7,8],
+            [0,3,6],[1,4,7],[2,5,8],
+            [0,4,8],[2,4,6],
+          ];
+          for (let i = 0;i < lines.length;i++) {
+            const [a,b,c] = lines[i];
+            if (squares[a] && squares[a] === squares[b] && squares[a] === squares[c]) {
+              return squares[a];
+            }
+          }
+          return null;
+        },
+        jumpTo(step) {
+          this.stepNumber = step;
+          this.xIsNext = (step % 2) === 0;
+          this.current = this.history[this.stepNumber];
+          this.winner(this.current);
+        },
+        getIndex(row,column) {
+          return (row - 1) * 3 + column - 1;
+        },
+        showNextStatus() {
+          return this.status = `下一個玩家: ${this.xIsNext ? 'X' : 'O'}`;
+        },
+        isCheckO(row,column) {
+          return this.current[this.getIndex(row,column)] === 'O';
+        },
+        isCantGo(row,column) {
+          return this.whoIsWinner(this.current) || this.current[this.getIndex(row,column)];
+        },
+      },
+    }).mount('#app');
+  </script>
+</body>
+</html>

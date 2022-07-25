@@ -1,0 +1,30 @@
+/* 全域 的 CSS  */
+* {
+  box-sizing: border-box;
+}
+
+body {
+  font: 24px "Century Gothic", Futura, sans-serif;
+  background-image: url(../image/x2.jpg);
+  margin: 0;
+  padding: 0;
+}
+
+input,
+button {
+  font-size: 100%;
+  line-height: 1.15;
+  cursor: pointer;
+}
+
+p {
+  margin: 5px;
+}
+
+::-webkit-scrollbar {
+  width: 0px;
+  height: 0px;
+  opacity: 0;
+}
+
+

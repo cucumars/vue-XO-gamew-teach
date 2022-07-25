@@ -1,0 +1,67 @@
+.homepage {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+  font-weight: bold;
+}
+
+.homepage h1 {
+  font-size: 100px;
+  color: blue;
+  text-align: center;
+}
+
+.homepage img {
+  width: 100px;
+  height: 100px;
+}
+
+.homepage button {
+  border: none;
+  color: black;
+  font-weight: 700;
+  background: #FCAD26;
+  background: radial-gradient(circle at center, yellow, red);
+  box-shadow: 0 5px #da9622;
+}
+
+.homepage button:hover {
+  background: linear-gradient(red, yellow, red);
+  color: purple;
+}
+
+.homepage p{
+  color: white;
+}
+.btn-big {
+  margin: 0px 0px 60px;
+  letter-spacing: 10px;
+  height: 100px;
+  width: 300px;
+  border-radius: 50%;
+  font-size: 40px;
+}
+
+.logos {
+  width: 250px;
+  height: 100px;
+  display: flex;
+  justify-content: space-evenly;
+  cursor: pointer;
+  margin-top: 30px;
+}
+
+.logo-left:hover {
+  transform: rotate(50deg);
+  margin-left: 30px;
+}
+
+.logo-right {
+  border-radius: 50%;
+}
+
+.logo-right:hover {
+  transform: matrix(-1.5, 0, 0, 1.5, 0, 0);  
+  margin-left: 30px;
+}

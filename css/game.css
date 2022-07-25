@@ -1,0 +1,83 @@
+/* 遊戲棋盤 CSS */    
+.play-game {
+  /* height: 100vh; */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+}
+
+.titleGame {
+  padding: 50px;
+  font-size: 100px;
+  font-weight: bold;
+  color: blueviolet;
+}
+
+.game {
+  position: relative;
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+}
+
+.board {
+  border: 6px solid #000;
+  border-radius: 10px;
+}
+
+.board-row {
+  display: flex;
+}
+
+.square {
+  width: 200px;
+  height: 200px;
+  border: 10px solid #000;
+  font-size: 200px;
+  font-weight: bold;
+  margin: -4px;
+  display: inline-flex;
+  justify-content: center;
+  align-items: center;
+  background-color: rgba(255, 255, 255, 0.4);
+  cursor: pointer;
+}
+
+.status {
+  font-size: 50px;
+  text-align: center;
+  color: yellow;
+  margin-bottom: 20px;
+}
+
+.color-check-O {
+  color: white;
+}
+
+.is-cant-go {
+  cursor: initial;
+}
+
+/* 遊戲資訊 CSS */
+.game-info {
+  position: absolute;
+  margin-bottom: auto;
+  margin-left: 20px;
+  width: 320px;
+  top: 0;
+  left: 100%;
+}
+
+.game-info ol, .game-info ul {
+padding-left: 30px;
+list-style: none;
+margin-top: -10px;
+margin-bottom: -10px;
+}
+
+.game-info p {
+font-size: 50px;
+margin: 12px;
+}
